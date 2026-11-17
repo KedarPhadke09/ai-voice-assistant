@@ -9,9 +9,10 @@ try:
     load_dotenv()
 except ImportError:
     pass
-from fastapi import FastAPI, Request, HTTPException
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -57,15 +58,12 @@ class ChatRequest(BaseModel):
 
 def build_gemini_contents(message: str, history: List[ChatMessage]) -> List[Dict[str, Any]]:
     contents = []
-    # Include up to last 10 messages for context and speed
     for h in history[-10:]:
         role = "user" if h.role.lower() in ["user", "human"] else "model"
         contents.append({
             "role": role,
             "parts": [{"text": h.content}]
         })
-    
-    # Append the latest user message
     contents.append({
         "role": "user",
         "parts": [{"text": message}]
@@ -73,10 +71,6 @@ def build_gemini_contents(message: str, history: List[ChatMessage]) -> List[Dict
     return contents
 
 def call_gemini_stream(contents: List[Dict[str, Any]], model: str, api_key: str, system_prompt: str, temperature: float = 0.7):
-    """
-    Streams response tokens from Gemini API using Server-Sent Events (SSE).
-    Implements automatic fallback if the requested model is overloaded (e.g., 503 spike).
-    """
     models_to_try = [model]
     for fb in FALLBACK_MODELS:
         if fb not in models_to_try:
@@ -89,13 +83,8 @@ def call_gemini_stream(contents: List[Dict[str, Any]], model: str, api_key: str,
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{candidate_model}:streamGenerateContent?alt=sse&key={api_key}"
         payload = {
             "contents": contents,
-            "systemInstruction": {
-                "parts": [{"text": system_prompt}]
-            },
-            "generationConfig": {
-                "temperature": temperature,
-                "maxOutputTokens": 800
-            }
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
+            "generationConfig": {"temperature": temperature, "maxOutputTokens": 800}
         }
         headers = {
             "Content-Type": "application/json",
@@ -109,10 +98,8 @@ def call_gemini_stream(contents: List[Dict[str, Any]], model: str, api_key: str,
                 response = r
                 break
             elif r.status_code in [503, 429, 404]:
-                # Try fallback model
                 continue
             else:
-                # Other HTTP error, break and return error message
                 err_text = r.text[:200]
                 yield f"data: {json.dumps({'error': f'Gemini API error ({r.status_code}): {err_text}', 'done': True})}\n\n"
                 return
@@ -120,10 +107,9 @@ def call_gemini_stream(contents: List[Dict[str, Any]], model: str, api_key: str,
             continue
 
     if response is None:
-        yield f"data: {json.dumps({'error': 'All Gemini models are temporarily busy or timed out. Please retry in a few seconds.', 'done': True})}\n\n"
+        yield f"data: {json.dumps({'error': 'All Gemini models are temporarily busy or timed out. Please retry in a moment.', 'done': True})}\n\n"
         return
 
-    # Emit metadata chunk with active model
     yield f"data: {json.dumps({'model': active_model, 'type': 'meta'})}\n\n"
 
     try:
@@ -154,7 +140,7 @@ def health_check():
         "status": "online",
         "service": "AI Voice Assistant API",
         "default_model": DEFAULT_MODEL,
-        "fallback_models": FALLBACK_MODELS,
+        "has_api_key": bool(DEFAULT_API_KEY),
         "timestamp": time.time()
     }
 
@@ -163,9 +149,9 @@ def get_models():
     return {
         "default": DEFAULT_MODEL,
         "models": [
-            {"id": "gemini-3.8-flash", "name": "Gemini 3.8 Flash (Ultra Fast - Voice Optimized)", "recommended": True},
-            {"id": "gemini-3.7-flash", "name": "Gemini 3.7 Flash (High Speed)", "recommended": False},
-            {"id": "gemini-3.5-flash", "name": "Gemini 3.5 Flash (Balanced)", "recommended": False},
+            {"id": "gemini-3.8-flash", "name": "Gemini 3.8 Flash (Ultra Fast)", "recommended": True},
+            {"id": "gemini-3.7-flash", "name": "Gemini 3.7 Flash", "recommended": False},
+            {"id": "gemini-3.5-flash", "name": "Gemini 3.5 Flash", "recommended": False},
             {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "recommended": False}
         ]
     }
@@ -174,7 +160,7 @@ def get_models():
 def chat_stream(request: ChatRequest):
     api_key = request.api_key.strip() if request.api_key else DEFAULT_API_KEY
     if not api_key:
-        raise HTTPException(status_code=400, detail="Missing Gemini API key.")
+        raise HTTPException(status_code=400, detail="Missing Gemini API key. Please configure GEMINI_API_KEY in .env or settings.")
 
     model = request.model.strip() if request.model else DEFAULT_MODEL
     system_prompt = request.system_instruction or SYSTEM_PROMPT
@@ -221,11 +207,7 @@ def chat_sync(request: ChatRequest):
             if r.status_code == 200:
                 data = r.json()
                 text = data["candidates"][0]["content"]["parts"][0]["text"]
-                return {
-                    "response": text,
-                    "model": candidate,
-                    "status": "success"
-                }
+                return {"response": text, "model": candidate, "status": "success"}
             else:
                 last_err = f"HTTP {r.status_code}: {r.text[:150]}"
         except Exception as e:
@@ -234,11 +216,33 @@ def chat_sync(request: ChatRequest):
 
     raise HTTPException(status_code=500, detail=f"Failed to generate response: {last_err}")
 
-# Mount public directory for static assets when running locally or served through FastAPI
-static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "public")
+# Static directory resolution
+base_dir = os.path.dirname(os.path.dirname(__file__))
+static_dir = os.path.join(base_dir, "public")
+
+# Explicit file routes so both /styles.css and /app.js ALWAYS return 200 OK
+@app.get("/styles.css")
+def get_styles():
+    css_file = os.path.join(static_dir, "styles.css")
+    if os.path.isfile(css_file):
+        return FileResponse(css_file, media_type="text/css")
+    raise HTTPException(status_code=404, detail="styles.css not found")
+
+@app.get("/app.js")
+def get_script():
+    js_file = os.path.join(static_dir, "app.js")
+    if os.path.isfile(js_file):
+        return FileResponse(js_file, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="app.js not found")
+
+@app.get("/")
+def get_index():
+    index_file = os.path.join(static_dir, "index.html")
+    if os.path.isfile(index_file):
+        return FileResponse(index_file, media_type="text/html")
+    raise HTTPException(status_code=404, detail="index.html not found")
+
+# Also mount static directory at /static and / for all other assets
 if os.path.isdir(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
-
-    @app.get("/")
-    def serve_index():
-        return FileResponse(os.path.join(static_dir, "index.html"))
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="public")

@@ -2,44 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Astra AI • Ultra-Fast Voice Assistant (Gemini 3.8 Flash)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* Embedded Base Fallback to guarantee stunning styling regardless of caching */
+    :root {
+      --bg: #05070d;
+      --bg-card: rgba(14, 20, 34, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --cyan: #00f5d4;
+      --cyan-glow: rgba(0, 245, 212, 0.4);
+      --purple: #8b5cf6;
+      --purple-glow: rgba(139, 92, 246, 0.4);
+      --pink: #ec4899;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 90% 40%, rgba(0, 245, 212, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 10% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+    }
+  </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2226%22>⚡</text></svg>">
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
+  <div class="app-layout">
+    <!-- Top Navigation Header -->
+    <header class="header">
       <div class="brand">
-        <div class="brand-logo">
-          <div class="logo-core"></div>
-          <div class="logo-ring"></div>
+        <div class="brand-orb">
+          <div class="brand-orb-inner"></div>
         </div>
-        <div class="brand-info">
-          <h1>ASTRA <span class="badge">VOICE</span></h1>
-          <p class="subtitle">Powered by Gemini 3.8 Flash</p>
+        <div class="brand-text">
+          <div class="brand-title">ASTRA <span class="badge-flash">3.8 FLASH</span></div>
+          <div class="brand-sub">Neural Voice Assistant</div>
         </div>
       </div>
 
-      <div class="header-actions">
-        <div class="model-badge" id="currentModelBadge" title="Current Active LLM">
-          <span class="status-dot"></span>
-          <span class="model-name">gemini-3.8-flash</span>
+      <div class="header-right">
+        <div class="latency-badge" id="latencyBadge" title="Latency & Model">
+          <span class="live-dot"></span>
+          <span class="badge-text" id="modelBadgeText">gemini-3.8-flash • 180ms</span>
         </div>
 
-        <button class="icon-btn" id="settingsBtn" title="Voice & Model Settings" aria-label="Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="btn-icon" id="settingsBtn" title="Voice & Model Settings" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
 
-        <button class="icon-btn" id="clearChatBtn" title="Clear Chat History" aria-label="Clear Chat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="btn-icon" id="clearChatBtn" title="Clear Conversation" aria-label="Clear Chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
           </svg>
@@ -47,87 +75,96 @@
       </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Voice Visualizer Hero Stage -->
-      <section class="visualizer-stage" id="visualizerStage">
-        <div class="orb-container">
-          <canvas id="waveformCanvas" width="360" height="360"></canvas>
-          <div class="orb-core" id="orbCore">
-            <div class="orb-glow"></div>
-            <div class="orb-particle-ring"></div>
-            <div class="orb-center-icon" id="orbIcon">⚡</div>
+    <!-- Main Visualizer & Chat Section -->
+    <main class="main-body">
+      <!-- Holographic Voice Orb Stage -->
+      <section class="orb-stage">
+        <div class="orb-wrapper" id="orbWrapper">
+          <canvas id="waveformCanvas" width="340" height="340"></canvas>
+          <div class="hologram-orb" id="hologramOrb">
+            <div class="orb-glow-back"></div>
+            <div class="orb-plasma"></div>
+            <div class="orb-core">
+              <span class="orb-icon" id="orbIcon">⚡</span>
+            </div>
+            <div class="sound-ripples">
+              <div class="ripple r1"></div>
+              <div class="ripple r2"></div>
+              <div class="ripple r3"></div>
+            </div>
           </div>
         </div>
 
-        <div class="voice-status" id="voiceStatus">
-          <span class="status-text">Ready • Tap mic to speak</span>
+        <div class="voice-state-pill" id="voiceStatePill">
+          <span class="state-dot"></span>
+          <span class="state-label" id="stateLabel">Tap orb or microphone to speak</span>
         </div>
 
-        <div class="interim-transcript" id="interimTranscript"></div>
+        <div class="live-transcript" id="liveTranscript"></div>
       </section>
 
-      <!-- Chat History -->
-      <section class="chat-section" id="chatSection">
-        <div class="messages-container" id="messagesContainer">
-          <div class="message assistant welcome">
-            <div class="message-avatar">⚡</div>
-            <div class="message-body">
-              <div class="message-text">
-                Hey there! I'm <strong>Astra</strong>, your ultra-fast voice assistant powered by <strong>Gemini 3.8 Flash</strong>.
-                Tap the microphone below to talk to me, or type anything. Responses are streamed and spoken instantly!
+      <!-- Chat Feed -->
+      <section class="chat-feed" id="chatFeed">
+        <div class="messages-list" id="messagesList">
+          <div class="message assistant intro">
+            <div class="msg-avatar">⚡</div>
+            <div class="msg-content">
+              <div class="msg-bubble">
+                Hello! I am <strong>Astra</strong>, your ultra-fast voice assistant powered by <strong>Gemini 3.8 Flash</strong>.
+                Tap the microphone or press Space to talk to me. Responses are synthesized and spoken instantly!
               </div>
-              <div class="message-meta">
-                <span class="meta-tag">Latency ~200ms</span>
+              <div class="msg-meta">
+                <span class="badge-mini">Gemini 3.8 Flash</span>
+                <span class="time-stamp">Now</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Suggestion Chips -->
+        <!-- Quick Starter Chips -->
         <div class="quick-chips" id="quickChips">
-          <button class="chip" data-prompt="Explain quantum computing in one simple sentence.">⚡ Quantum in 1 sentence</button>
-          <button class="chip" data-prompt="Tell me a quick witty tech joke.">🎤 Quick tech joke</button>
-          <button class="chip" data-prompt="Give me a 30-second motivational boost for coding.">🚀 Motivational boost</button>
-          <button class="chip" data-prompt="What makes Gemini 3.8 Flash so fast?">⚡ Why Gemini 3.8 Flash?</button>
+          <button class="chip" data-prompt="What can you do? Give me a 15-second overview.">⚡ What can you do?</button>
+          <button class="chip" data-prompt="Tell me a quick witty science joke.">🎤 Quick science joke</button>
+          <button class="chip" data-prompt="Explain quantum computing in one short sentence.">🧠 Quantum in 1 sentence</button>
+          <button class="chip" data-prompt="Give me a high-energy motivational quote for today.">🚀 Motivational spark</button>
         </div>
       </section>
     </main>
 
-    <!-- Bottom Controls & Input Bar -->
-    <footer class="app-footer">
-      <div class="controls-wrapper">
-        <!-- Voice Toggle Controls -->
-        <div class="voice-toolbar">
-          <button class="mode-toggle active" id="voiceOutputToggle" title="Toggle AI Voice Speech Synthesis">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- Floating Dock Input Area -->
+    <footer class="dock-footer">
+      <div class="dock-container">
+        <!-- Voice Toolbar -->
+        <div class="voice-actions">
+          <button class="tool-btn active" id="voiceAudioToggle" title="Toggle Voice Output">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
             </svg>
-            <span>Voice Audio: ON</span>
+            <span id="audioToggleText">Voice Audio: ON</span>
           </button>
 
-          <button class="mode-toggle" id="continuousModeToggle" title="Auto-listen again after AI finishes speaking">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="tool-btn" id="handsFreeToggle" title="Auto-listen after assistant finishes speaking">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
-            <span>Hands-free: OFF</span>
+            <span id="handsFreeText">Hands-free: OFF</span>
           </button>
 
-          <button class="stop-speech-btn" id="stopSpeechBtn" title="Stop speech" style="display: none;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="6" y="6" width="12" height="12"></rect>
+          <button class="tool-btn stop-btn" id="stopSpeechBtn" style="display: none;" title="Interrupt / Stop Voice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="5" y="5" width="14" height="14" rx="2"></rect>
             </svg>
-            <span>Stop Audio</span>
+            <span>Stop Speech</span>
           </button>
         </div>
 
-        <!-- Input Bar with Big Mic Button -->
-        <div class="input-bar">
-          <button class="mic-button" id="micBtn" title="Speak to Astra" aria-label="Microphone">
-            <div class="mic-wave"></div>
-            <svg class="mic-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- Input Bar -->
+        <div class="input-card">
+          <button class="mic-orb-btn" id="micBtn" title="Speak (Click or hold)" aria-label="Microphone">
+            <div class="mic-glow"></div>
+            <svg class="mic-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
               <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -135,15 +172,15 @@
             </svg>
           </button>
 
-          <div class="text-input-container">
+          <div class="input-box">
             <input 
               type="text" 
-              id="textInput" 
+              id="chatInput" 
               placeholder="Ask anything or click the microphone to speak..." 
               autocomplete="off"
             />
-            <button class="send-button" id="sendBtn" title="Send message" aria-label="Send">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="send-btn" id="sendBtn" title="Send" aria-label="Send">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
               </svg>
@@ -154,69 +191,64 @@
     </footer>
   </div>
 
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2>Settings & Customization</h2>
-        <button class="modal-close" id="closeSettingsBtn">&times;</button>
+  <!-- Settings Modal Dialog -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3>Assistant Settings</h3>
+        <button class="modal-close" id="closeSettingsModal">&times;</button>
       </div>
 
-      <div class="modal-body">
-        <!-- Model Selection -->
-        <div class="setting-group">
-          <label for="modelSelect">Gemini Model</label>
-          <select id="modelSelect">
-            <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Ultra Fast - Voice Default)</option>
+      <div class="modal-content">
+        <div class="form-row">
+          <label for="modelDropdown">Gemini Model</label>
+          <select id="modelDropdown">
+            <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Ultra Fast • Recommended)</option>
             <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
             <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
             <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
           </select>
-          <p class="setting-hint">Gemini 3.8 Flash provides the lowest latency and streaming token speed for real-time voice.</p>
+          <span class="form-hint">Gemini 3.8 Flash yields the lowest latency and highest token-per-second streaming rate.</span>
         </div>
 
-        <!-- Voice Selection -->
-        <div class="setting-group">
-          <label for="voiceSelect">Assistant Voice</label>
-          <select id="voiceSelect">
-            <option value="">Default Browser Voice</option>
+        <div class="form-row">
+          <label for="voiceDropdown">Speech Synthesis Voice</label>
+          <select id="voiceDropdown">
+            <option value="">Default System Voice</option>
           </select>
         </div>
 
-        <!-- Speech Rate -->
-        <div class="setting-group">
-          <div class="slider-header">
-            <label for="speechRate">Speech Speed</label>
-            <span class="slider-val" id="speechRateVal">1.15x</span>
+        <div class="form-row">
+          <div class="label-split">
+            <label for="speedRange">Voice Speed</label>
+            <span class="val-tag" id="speedTag">1.15x</span>
           </div>
-          <input type="range" id="speechRate" min="0.8" max="2.0" step="0.05" value="1.15">
-          <p class="setting-hint">Faster speech rate enhances the snappy, rapid assistant feel.</p>
+          <input type="range" id="speedRange" min="0.8" max="2.0" step="0.05" value="1.15">
+          <span class="form-hint">Faster speeds (1.15x - 1.3x) create an energetic, rapid voice assistant feel.</span>
         </div>
 
-        <!-- Speech Pitch -->
-        <div class="setting-group">
-          <div class="slider-header">
-            <label for="speechPitch">Voice Pitch</label>
-            <span class="slider-val" id="speechPitchVal">1.0x</span>
+        <div class="form-row">
+          <div class="label-split">
+            <label for="pitchRange">Voice Pitch</label>
+            <span class="val-tag" id="pitchTag">1.0x</span>
           </div>
-          <input type="range" id="speechPitch" min="0.5" max="1.5" step="0.05" value="1.0">
+          <input type="range" id="pitchRange" min="0.6" max="1.4" step="0.05" value="1.0">
         </div>
 
-        <!-- Custom API Key Override -->
-        <div class="setting-group">
-          <label for="apiKeyInput">Gemini API Key (Optional Override)</label>
-          <input type="password" id="apiKeyInput" placeholder="Leave blank to use pre-configured system key" />
-          <p class="setting-hint">Your API key is stored safely in your browser's local storage.</p>
+        <div class="form-row">
+          <label for="apiKeyField">Custom Gemini API Key (Optional)</label>
+          <input type="password" id="apiKeyField" placeholder="Leave empty to use pre-configured environment key">
+          <span class="form-hint">Stored strictly in your local browser storage.</span>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="resetSettingsBtn">Reset Defaults</button>
-        <button class="btn btn-primary" id="saveSettingsBtn">Save & Apply</button>
+      <div class="modal-bottom">
+        <button class="btn-ghost" id="resetDefaultsBtn">Reset</button>
+        <button class="btn-glow" id="applySettingsBtn">Save Changes</button>
       </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
