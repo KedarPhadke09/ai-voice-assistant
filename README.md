@@ -7,6 +7,8 @@ An ultra-responsive, real-time AI voice assistant chatbot built with **Python Fa
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)
 ![Latency](https://img.shields.io/badge/Latency-Sub--300ms-ff007f?style=for-the-badge)
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKedarPhadke09%2Fai-voice-assistant&env=GEMINI_API_KEY,GEMINI_MODEL&envDescription=Enter%20your%20Google%20Gemini%20API%20Key&project-name=ai-voice-assistant)
+
 ---
 
 ## 🌟 Highlights
