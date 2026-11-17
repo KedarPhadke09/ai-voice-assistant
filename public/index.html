@@ -123,6 +123,7 @@
 
         <!-- Quick Starter Chips -->
         <div class="quick-chips" id="quickChips">
+          <button class="chip" data-prompt="नमस्ते! आप क्या-क्या कर सकते हैं?">🇮🇳 नमस्ते! (Hindi)</button>
           <button class="chip" data-prompt="What can you do? Give me a 15-second overview.">⚡ What can you do?</button>
           <button class="chip" data-prompt="Tell me a quick witty science joke.">🎤 Quick science joke</button>
           <button class="chip" data-prompt="Explain quantum computing in one short sentence.">🧠 Quantum in 1 sentence</button>
@@ -150,6 +151,15 @@
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
             <span id="handsFreeText">Hands-free: OFF</span>
+          </button>
+
+          <button class="tool-btn" id="langToggleBtn" title="Switch Language (English / हिन्दी)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span id="langToggleText">Lang: EN</span>
           </button>
 
           <button class="tool-btn stop-btn" id="stopSpeechBtn" style="display: none;" title="Interrupt / Stop Voice">
@@ -200,6 +210,16 @@
       </div>
 
       <div class="modal-content">
+        <div class="form-row">
+          <label for="languageDropdown">Speech Recognition Language</label>
+          <select id="languageDropdown">
+            <option value="en-US" selected>English (US / Global)</option>
+            <option value="hi-IN">हिन्दी (Hindi - India)</option>
+            <option value="en-IN">English (India / Hinglish)</option>
+          </select>
+          <span class="form-hint">Choose Hindi to speak in pure Hindi or Hinglish through your microphone.</span>
+        </div>
+
         <div class="form-row">
           <label for="modelDropdown">Gemini Model</label>
           <select id="modelDropdown">

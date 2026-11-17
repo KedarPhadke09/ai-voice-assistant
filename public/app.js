@@ -63,6 +63,7 @@
     isSpeaking: false,
     voiceAudioEnabled: true,
     handsFreeMode: false,
+    currentLang: localStorage.getItem('astra_lang') || 'en-US',
     activeModel: localStorage.getItem('astra_model') || 'gemini-3.8-flash',
     apiKeyOverride: localStorage.getItem('astra_api_key') || '',
     speechRate: parseFloat(localStorage.getItem('astra_speed') || '1.15'),
@@ -92,6 +93,9 @@
   const audioToggleText = document.getElementById('audioToggleText');
   const handsFreeToggle = document.getElementById('handsFreeToggle');
   const handsFreeText = document.getElementById('handsFreeText');
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  const langToggleText = document.getElementById('langToggleText');
+  const languageDropdown = document.getElementById('languageDropdown');
   const stopSpeechBtn = document.getElementById('stopSpeechBtn');
   const clearChatBtn = document.getElementById('clearChatBtn');
   const modelBadgeText = document.getElementById('modelBadgeText');
@@ -126,9 +130,10 @@
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = state.currentLang;
 
     recognition.onstart = () => {
+      recognition.lang = state.currentLang;
       state.isListening = true;
       sfx.playChime('start');
       micBtn.classList.add('listening');
@@ -288,7 +293,13 @@
     utterance.rate = state.speechRate;
     utterance.pitch = state.speechPitch;
 
-    if (state.selectedVoiceURI) {
+    // Detect if sentence contains Hindi (Devanagari) characters
+    const hasHindi = /[\u0900-\u097F]/.test(sentence);
+    if (hasHindi) {
+      utterance.lang = 'hi-IN';
+      const hindiVoice = voices.find(v => v.lang.startsWith('hi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('swara') || v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('hemant'));
+      if (hindiVoice) utterance.voice = hindiVoice;
+    } else if (state.selectedVoiceURI) {
       const v = voices.find(x => x.voiceURI === state.selectedVoiceURI);
       if (v) utterance.voice = v;
     }
@@ -594,6 +605,24 @@
     }
   });
 
+  function updateLangUI() {
+    if (langToggleText) {
+      langToggleText.textContent = state.currentLang.startsWith('hi') ? 'Lang: हिन्दी' : 'Lang: EN';
+    }
+    if (state.recognition) {
+      state.recognition.lang = state.currentLang;
+    }
+  }
+
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', () => {
+      state.currentLang = state.currentLang.startsWith('hi') ? 'en-US' : 'hi-IN';
+      localStorage.setItem('astra_lang', state.currentLang);
+      updateLangUI();
+      updateStatus(state.currentLang.startsWith('hi') ? 'भाषा: हिन्दी (Hindi)' : 'Language: English (US)');
+    });
+  }
+
   voiceAudioToggle.addEventListener('click', () => {
     state.voiceAudioEnabled = !state.voiceAudioEnabled;
     voiceAudioToggle.classList.toggle('active', state.voiceAudioEnabled);
@@ -635,6 +664,7 @@
 
   // Settings Modal Handlers
   settingsBtn.addEventListener('click', () => {
+    if (languageDropdown) languageDropdown.value = state.currentLang;
     modelDropdown.value = state.activeModel;
     speedRange.value = state.speechRate;
     speedTag.textContent = `${state.speechRate.toFixed(2)}x`;
@@ -661,41 +691,48 @@
   });
 
   applySettingsBtn.addEventListener('click', () => {
+    if (languageDropdown) state.currentLang = languageDropdown.value;
     state.activeModel = modelDropdown.value;
     state.selectedVoiceURI = voiceDropdown.value;
     state.speechRate = parseFloat(speedRange.value);
     state.speechPitch = parseFloat(pitchRange.value);
     state.apiKeyOverride = apiKeyField.value.trim();
 
+    localStorage.setItem('astra_lang', state.currentLang);
     localStorage.setItem('astra_model', state.activeModel);
     localStorage.setItem('astra_voice', state.selectedVoiceURI);
     localStorage.setItem('astra_speed', state.speechRate.toString());
     localStorage.setItem('astra_pitch', state.speechPitch.toString());
     localStorage.setItem('astra_api_key', state.apiKeyOverride);
 
+    updateLangUI();
     if (modelBadgeText) modelBadgeText.textContent = `${state.activeModel} • 180ms`;
     settingsModal.classList.remove('open');
   });
 
   resetDefaultsBtn.addEventListener('click', () => {
+    state.currentLang = 'en-US';
     state.activeModel = 'gemini-3.8-flash';
     state.selectedVoiceURI = '';
     state.speechRate = 1.15;
     state.speechPitch = 1.0;
     state.apiKeyOverride = '';
 
+    localStorage.removeItem('astra_lang');
     localStorage.removeItem('astra_model');
     localStorage.removeItem('astra_voice');
     localStorage.removeItem('astra_speed');
     localStorage.removeItem('astra_pitch');
     localStorage.removeItem('astra_api_key');
 
+    if (languageDropdown) languageDropdown.value = 'en-US';
     modelDropdown.value = 'gemini-3.8-flash';
     speedRange.value = 1.15;
     speedTag.textContent = '1.15x';
     pitchRange.value = 1.0;
     pitchTag.textContent = '1.0x';
     apiKeyField.value = '';
+    updateLangUI();
     if (modelBadgeText) modelBadgeText.textContent = 'gemini-3.8-flash • 180ms';
     settingsModal.classList.remove('open');
   });
@@ -704,6 +741,7 @@
   window.addEventListener('DOMContentLoaded', () => {
     initSpeechRecognition();
     renderWaveform();
+    updateLangUI();
     if (modelBadgeText) modelBadgeText.textContent = `${state.activeModel} • 180ms`;
   });
 })();
